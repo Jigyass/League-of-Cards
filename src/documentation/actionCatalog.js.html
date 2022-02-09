@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: actionCatalog.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: actionCatalog.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>class Action{
+    constructor(name, range, validTarget, flags, actionFunction){
+        this.name = name
+        this.range = range
+        this.validTarget = validTarget
+        this.flags = flags
+        this.function = actionFunction
+    }
+}
+
+class Flag{
+    constructor(flagID, relevantTiles){
+        this.flagID = flagID
+        this.relevantTiles = relevantTiles
+    }
+}
+
+function commanderMove(){
+    let name = "Move"
+    
+    let range = range_radialRange(1)
+    let validTarget = validTarget_unoccupied()
+    let flags = []
+    let flagID1 = "UNIT_MOVETOTILE"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target, playerID){
+        target.unit = source.unit
+        source.unit = null
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function commanderAttack(){
+    let name = "Attack"
+    
+    let range = range_radialRange(1)
+    let validTarget = validTarget_unit()
+    let flags = []
+    let flagID1 = "UNIT_MOVETOTILE"
+    let flagID2 = "UNIT_DESTROYED"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    flags[1] = new Flag(flagID2, relevantTiles1)
+    function actionFunction(source, target, playerID){
+        target.unit = source.unit
+        source.unit = null
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function range_radialRange(radius){       //pass in the desired radius and the range function for a radial range will be returned
+    function range(source){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        const radiusFromCast = radius
+        for (let x = -radiusFromCast; x &lt;= radiusFromCast; x++) {
+            for (let y = -radiusFromCast; y &lt;= radiusFromCast; y++) {
+                try{
+                    arr[source.xPos + x][source.yPos + y] = true
+                }
+                catch(error){
+                }
+            }            
+        }
+        return arr
+    }
+
+    return range
+}
+
+function validTarget_unoccupied(){      //returns a validTarget function where the conditions are target is in range and does not contain a unit
+    function validTarget(source, range, target){
+        let valid = false
+        let arr = range(source)
+
+        let targetInRange = arr[target.xPos][target.yPos]
+        let targetUnoccupied = false
+        if (target.unit == null) {
+            targetUnoccupied = true
+        }
+
+        if (targetInRange &amp;&amp; targetUnoccupied) {
+            valid = true
+        }
+
+        return valid
+    }
+
+    return validTarget
+}
+
+function validTarget_inRange(){      //returns a validTarget function where the conditions are target is in range and does not contain a unit
+    function validTarget(source, range, target){
+        let valid = false
+        let arr = range(source)
+
+        let targetInRange = arr[target.xPos][target.yPos]
+        if (targetInRange) {
+            valid = true
+        }
+
+        return valid
+    }
+
+    return validTarget
+}
+
+function validTarget_unit(){      //returns a validTarget function where the conditions are target is in range and contains a unit
+    function validTarget(source, range, target){
+        let valid = false
+        let arr = range(source)
+
+        let targetInRange = arr[target.xPos][target.yPos]
+        let targetOccupied = false
+        if (target.unit != null) {
+            targetOccupied = true
+        }
+
+        if (targetInRange &amp;&amp; targetOccupied) {
+            valid = true
+        }
+
+        return valid
+    }
+
+    return validTarget
+}
+
+function validTarget_enemyUnit(){      //returns a validTarget function where the conditions are target is in range and contains a unit
+    function validTarget(source, range, target){
+        let valid = false
+        let arr = range(source)
+
+        let targetInRange = arr[target.xPos][target.yPos]
+        let targetOccupied = false
+        if (target.unit != null) {
+            targetOccupied = true
+        }
+
+        if (targetInRange &amp;&amp; targetOccupied) {
+            valid = true
+        }
+
+        return valid
+    }
+
+    return validTarget
+}
+
+/** 
+function action_template(){
+    let name = ""
+    
+    function range(source){     //source is the tile the card is being cast from
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        return arr
+    }
+    function validTarget(source, range, target){        //range is the range function (above), target is the target tile
+
+    }
+    let flags = []
+    let flagID1 = ""
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target, playerID){
+
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+*/
+
+function action_summonGuardTower(){
+    let name = "Summon Guard Tower"
+    
+    let range = range_radialRange(3)
+    let validTarget = validTarget_unoccupied()
+
+    let flags = []
+    let flagID1 = "UNIT_ETB"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true //relevant tiles is just the target tile
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    
+    function actionFunction(source, target, playerID){
+        let Guard_Tower = unit_guardTower(playerID)
+        target.unit = Guard_Tower;      //sets target tile's unit to a guardTower
+
+        let defended = trigger_defended(playerID)
+        let defendedRadius = 2
+        for (let x = -defendedRadius; x &lt;= defendedRadius; x++) {
+            for (let y = -defendedRadius; y &lt;= defendedRadius; y++) {
+                try{
+                    map.tiles[target.xPos + x][target.yPos + y].triggers.push(defended)     //when GT is summoned, all tiles within radius 2 gain "defended" trigger   
+                }
+                catch(error){
+                }
+            }
+        }
+
+        guardTowerDestroyed = trigger_guardTowerDestroyed(playerID)
+        map.tiles[target.xPos][target.yPos].triggers.push(guardTowerDestroyed)  //adds a trigger to the tile it's summoned on for when the guard tower is destroyed
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function action_summonKnight(){
+    let name = "Summon Knight"
+    
+    let range = range_radialRange(5)
+    let validTarget = validTarget_unoccupied()
+    
+    let flags = []
+    let flagID1 = "UNIT_ETB"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+        
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target, playerID){
+        let unit = unit_knight(playerID)
+        map.tiles[target.xPos][target.yPos].unit = unit
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function action_summonWizard(){
+    let name = "Summon Wizard"
+    
+    let range = range_radialRange(1)
+    let validTarget = validTarget_unoccupied()
+
+    let flags = []
+    let flagID1 = "UNIT_ETB"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true //relevant tiles is just the target tile
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target, playerID){
+        let unit = unit_wizard(playerID)
+        map.tiles[target.xPos][target.yPos].unit = unit
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function action_knightMove(){
+    let name = "Move"
+    
+    let range = range_radialRange(3)
+    let validTarget = validTarget_unoccupied()
+    let flags = []
+    let flagID1 = "UNIT_MOVETOTILE"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target, playerID){
+        target.unit = source.unit
+        source.unit = null
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function action_knightCharge(){
+    let name = "Charge"
+    
+    function range(source){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        let chargeRange = 7
+        for (let x = -chargeRange; x &lt;= chargeRange; x++) {
+            try {
+                arr[source.xPos + x][source.yPos] = true        //directly horizontal tiles within chargeRange are in range
+            } catch (error) {
+            }
+        }
+        for (let y = -chargeRange; y &lt;= chargeRange; y++) {
+            try {
+                arr[source.xPos][source.yPos + y] = true        //directly vertical tiles within chargeRange are in range
+            } catch (error) {
+            }
+        }
+
+
+        return arr
+    }
+    
+    let validTarget = validTarget_unit()
+
+    let flags = []
+    let flagID1 = "UNIT_DESTROYED"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    let flagID2 = "UNIT_MOVETOTILE"
+    function relevantTiles2(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+
+        return arr
+    }
+    flags[1] = new Flag(flagID2, relevantTiles2)
+
+    function actionFunction(source, target, playerID){
+        target.unit = source.unit
+        source.unit = null
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+
+function action_placeMagicalLandmine(){
+    let name = "Place Magical Landmine"
+    
+    let range = range_radialRange(10)
+    let validTarget = validTarget_inRange()
+
+    let flags = []
+    
+    function actionFunction(source, target, playerID){
+        let landMine = trigger_magicalLandmine(playerID) // CHECK THIS OUT
+
+        target.triggers.push(landMine)
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function action_wizardMove(){
+    let name = "Move"
+    
+    let range = range_radialRange(1)
+    let validTarget = validTarget_unoccupied()
+    let flags = []
+    let flagID1 = "UNIT_MOVETOTILE"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target){
+        target.unit = source.unit
+        source.unit = null
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function action_wizardTeleport(){
+    let name = "Teleport"
+    
+    let range = range_radialRange(30) 
+    let validTarget = validTarget_unoccupied() //need to define a unique function for this that prevents the wizard from teleporting too close to an enemy unit (within the action itself)
+    let flags = []
+    let flagID1 = "UNIT_MOVETOTILE"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target){
+        target.unit = source.unit
+        source.unit = null
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function action_wizardFireball(){
+    let name = "Fireball"
+    
+    let range = range_radialRange(15)
+    let validTarget = validTarget_inRange()
+    let flags = []
+    let flagID1 = "UNIT_BLOWUPTILE"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        arr[target.xPos][target.yPos] = true
+
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target){
+        target.unit = source.unit
+        source.unit = null
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}
+
+function action_fireball(){
+    let name = "fireball"
+    
+    let range = range_radialRange(8)
+    let validTarget = validTarget_inRange()
+    let flags = []
+    let flagID1 = "UNIT_DESTROYED"
+    function relevantTiles1(target){
+        const width = map.xWidth, height = map.yHeight;
+        const initialVal = false;
+
+        var arr = Array(width);
+        for (var x = 0; x &lt; width; x++) {
+            arr[x] = Array(height).fill(initialVal);
+        }
+
+        let blastRadius = 3
+        for (let x = -blastRadius; x &lt;= blastRadius; x++) {
+            for (let y = -blastRadius; y &lt;= blastRadius; y++) {
+                try {
+                    arr[target.xPos + x][target.yPos + y] = true
+                } catch (error) {
+                    
+                }                
+            }            
+        }
+        return arr
+    }
+    flags[0] = new Flag(flagID1, relevantTiles1)
+    function actionFunction(source, target, playerID){
+        let blastRadius = 3
+        for (let x = -blastRadius; x &lt;= blastRadius; x++) {
+            for (let y = -blastRadius; y &lt;= blastRadius; y++) {
+                try {
+                    map.tiles[target.xPos + x][target.yPos + y].unit = null
+                } catch (error) {
+                }                
+            }            
+        }
+    }
+
+    let action = new Action(name, range, validTarget, flags, actionFunction)
+    return action
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#action_summonGuardTower">action_summonGuardTower</a></li><li><a href="global.html#actionRounding">actionRounding</a></li><li><a href="global.html#canvasRounding">canvasRounding</a></li><li><a href="global.html#card_fireball">card_fireball</a></li><li><a href="global.html#cardRounding">cardRounding</a></li><li><a href="global.html#clickProcessing">clickProcessing</a></li><li><a href="global.html#drawActions">drawActions</a></li><li><a href="global.html#drawBoard">drawBoard</a></li><li><a href="global.html#drawCards">drawCards</a></li><li><a href="global.html#drawTemplate">drawTemplate</a></li><li><a href="global.html#drawUnits">drawUnits</a></li><li><a href="global.html#executeAction">executeAction</a></li><li><a href="global.html#executeTileTriggers">executeTileTriggers</a></li><li><a href="global.html#executeUnitTriggers">executeUnitTriggers</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#passTurn">passTurn</a></li><li><a href="global.html#tileRounding">tileRounding</a></li><li><a href="global.html#trigger_commanderDestroyed">trigger_commanderDestroyed</a></li><li><a href="global.html#unit_guardTower">unit_guardTower</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Oct 31 2021 11:40:38 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

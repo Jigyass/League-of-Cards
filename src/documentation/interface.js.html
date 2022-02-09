@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: interface.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: interface.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>let canvas
+let context
+
+ /**  
+    @pre : assumes initialization has just been completed. 
+    @post : draws board, cards, and actions.
+*/
+function drawTemplate() {
+    if (gameWon == null) {
+        drawBoard();
+        drawCards();
+        drawActions();
+        drawUnits();
+    
+        if (actionSelected != null) {
+            highlightTiles_ActionRange()
+        }
+    }
+    else {
+        drawWinScreen(gameWon)
+    }
+}
+
+/**    
+    @post : draws the board
+*/
+function drawBoard() {
+    // draw board
+    canvas = document.getElementById("board");
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 2000, 1000);
+    //loop for drawing grid lines
+    for (var i = 0; i &lt;= 1400; i = i + 40) {
+
+        ctx.beginPath();
+        ctx.lineWidth = "1";
+        ctx.strokeStyle = "black";
+        //vertical lines
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, 1400);
+
+        //horizontal lines
+        ctx.moveTo(0, i);
+        ctx.lineTo(1400, i);
+
+        ctx.strokeStyle = "black";
+        ctx.stroke();
+    }
+}
+
+/**    
+    @post : draws five spaces for cards to be drawn (at this point in implementation, does not have the functionality for drawing the cards themselves)
+    @fix : add, the print name, and draw rectangle. maybe second for loop. depending on number of cards, use ctx.filltext to write card's name at the top of the card.
+*/
+function drawCards() {
+    //draw cards
+    canvas = document.getElementById("cards");
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 2000, 1000);
+    ctx.beginPath();
+    ctx.lineWidth = "3";
+    ctx.strokeStyle = "black";
+    ctx.font = "bold 12pt Verdana";
+
+    //loop draws card rectangles but very messily
+
+    let j = 0;
+    for (var i = 80; i &lt;= 704; i = i + 156) {
+        ctx.rect(i, 20, 100, 150);      //top left corner is at [i, 20] then [width, height]
+        ctx.stroke();
+
+        if(turn == 1 &amp;&amp; j &lt; player1.hand.cards.length)
+        {
+            ctx.fillText(player1.hand.cards[j].name, i + 2, 37, 95)
+        }
+        else if (turn == 2 &amp;&amp; j &lt; player2.hand.cards.length)
+        {
+            ctx.fillText(player2.hand.cards[j].name, i + 2, 37, 95);
+        }
+        j++
+    }
+}
+
+
+/**    
+    @post : draws the symbols all units in the appropriate tiles.
+*/
+function drawUnits() {
+    canvas = document.getElementById("board")
+    ctx = canvas.getContext("2d");
+    ctx.font = "30pt Calibri"
+    for(let x = 0; x &lt; map.xWidth; x++){
+        for(let y = 0; y &lt; map.yHeight; y++){
+            if(map.tiles[x][y].unit != null){
+                let symbol = map.tiles[x][y].unit.symbol
+                let xCoord = Math.floor(3 + x*40)
+                let yCoord = Math.floor(33 + y*40)
+                let maxWidth = 35
+                ctx.fillText(symbol, xCoord, yCoord, maxWidth)      //drawing symbol for the unit
+                //console.log("unit " + symbol + " drawn at (" + xCoord + ", " + yCoord + ") = tile (" + x + ", " + y + ")")
+            }
+        }
+    }
+}
+
+
+/**    
+    @post : draws three action buttons. If a unit is selected, will name these buttons after the actions available to that unit.
+*/
+function drawActions() {
+    canvas = document.getElementById("actions");
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 2000, 1000);
+    ctx.font = "21pt Impact"
+    ctx.beginPath();
+    ctx.lineWidth = "3";
+    ctx.strokeStyle = "black";
+
+    for (let i = 0; i &lt; 3; i++) {
+        yCoord = 60*i
+        ctx.rect(90, 25 + yCoord, 300, 30);
+        ctx.stroke();
+        if(unitSelected != null){
+            if(unitSelected.actions[i] != null){
+                ctx.fillText(unitSelected.actions[i].name, 95, 50 + yCoord, 90)
+            }
+        }
+    }
+}
+
+function drawSelectedInfo() {
+
+}
+
+function highlightTiles_ActionRange() {
+    actionRange = actionSelected.range(tileSelected)
+
+    for (let x = 0; x &lt; map.xWidth; x++) {
+        for (let y = 0; y &lt; map.yHeight; y++) {
+            if (actionRange[x][y]) {
+                highlightTile(x,y)
+            }            
+        }        
+    }
+}
+
+function highlightTile(x, y) {
+    canvas = document.getElementById("board");
+    ctx = canvas.getContext("2d");
+    ctx.beginPath();
+    ctx.lineWidth = "2";
+    ctx.strokeStyle = "red";
+
+    ctx.rect(40*x, 40*y, 40, 40)
+    ctx.stroke()
+}
+
+function drawWinScreen(player){
+    canvas = document.getElementById("board");
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 2000, 1000);
+    ctx.font = "90pt Impact"
+    ctx.fillText("PLAYER " + player + " WINS", 530, 350, 350)
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#action_summonGuardTower">action_summonGuardTower</a></li><li><a href="global.html#actionRounding">actionRounding</a></li><li><a href="global.html#canvasRounding">canvasRounding</a></li><li><a href="global.html#card_fireball">card_fireball</a></li><li><a href="global.html#cardRounding">cardRounding</a></li><li><a href="global.html#clickProcessing">clickProcessing</a></li><li><a href="global.html#drawActions">drawActions</a></li><li><a href="global.html#drawBoard">drawBoard</a></li><li><a href="global.html#drawCards">drawCards</a></li><li><a href="global.html#drawTemplate">drawTemplate</a></li><li><a href="global.html#drawUnits">drawUnits</a></li><li><a href="global.html#executeAction">executeAction</a></li><li><a href="global.html#executeTileTriggers">executeTileTriggers</a></li><li><a href="global.html#executeUnitTriggers">executeUnitTriggers</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#passTurn">passTurn</a></li><li><a href="global.html#tileRounding">tileRounding</a></li><li><a href="global.html#trigger_commanderDestroyed">trigger_commanderDestroyed</a></li><li><a href="global.html#unit_guardTower">unit_guardTower</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Oct 31 2021 11:40:38 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

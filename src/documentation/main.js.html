@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: main.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: main.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>document.addEventListener("DOMContentLoaded", () => {
+    initialize()
+});
+
+/**    
+    @pre : called only when DOM content has loaded.
+    @post : constructs a map and two players, draws board and commanders.
+*/
+function initialize(){
+    map = new Map()
+    player1 = new Player(1)
+    player2 = new Player(2)
+    drawTemplate()
+}
+
+/**    
+    @param : x and y, the x and y coordinates of a click on the screen
+    @post : returns a value representing which canvas (board, cards, or actions) x and y correspond to.
+*/
+function canvasRounding(x, y){
+    let section = 0
+    if(x > 8 &amp;&amp; x &lt; 1408 &amp;&amp; y > 8 &amp;&amp; y &lt; 608){
+        section = 1
+    }
+    else if(x > 8 &amp;&amp; x &lt; 909 &amp;&amp; y > 626 &amp;&amp; y &lt; 827){
+        section = 2
+    }
+    else if(x > 914 &amp;&amp; x &lt; 1408 &amp;&amp; y > 626 &amp;&amp; y &lt; 827){
+        section = 3
+    }
+    //console.log(section)
+    return(section)
+}
+
+/**    
+    @param : x and y, the x and y coordinates of a click on the screen
+    @pre : assumes x and y correspond to the board canvas
+    @post : returns the tile that x and y correspond to.
+*/
+function tileRounding(x, y){
+    roundedXCoordinate = Math.floor((x - 8)/40)
+    roundedYCoordinate = Math.floor((y - 8)/40)
+    //console.log([roundedXCoordinate, roundedYCoordinate])
+    return(map.tiles[roundedXCoordinate][roundedYCoordinate])
+}
+
+/**    
+    @param : x and y, the x and y coordinates of a click on the screen
+    @pre : assumes x and y correspond to the cards canvas
+    @post : returns the card that x and y correspond to.
+*/
+function cardRounding(x, y){
+    //all cards [647 &lt; y &lt; 797]
+    //card 1 [88 &lt; x &lt; 188]
+    //card 2 [244 &lt; x &lt; 344]
+    //card 3 [400 &lt; x &lt; 500]
+    //card 4 [556 &lt; x &lt; 656]
+    //card 5 [712 &lt; x &lt; 812]
+
+    let cardNum = null
+
+    if (y >= 647 &amp;&amp; y &lt;= 797) {                 //test y coord of click
+        if (x >= 88 &amp;&amp; x &lt;= 188) {              //test x coord of click
+            cardNum = 0                         //set cardNum to array value of card clicked
+        }
+        else if (x >= 244 &amp;&amp; x &lt;= 344){
+            cardNum = 1
+        }
+        else if (x >= 400 &amp;&amp; x &lt;= 500){
+            cardNum = 2
+        }
+        else if (x >= 556 &amp;&amp; x &lt;= 656){
+            cardNum = 3
+        }
+        else if (x >= 712 &amp;&amp; x &lt;= 812){
+            cardNum = 4
+        }
+    }
+    
+    let card = null
+    if (turn == 1) {                             //check who's turn it is
+        try {
+            card = player1.hand.cards[cardNum]   //try to set card to the card clicked
+        } catch (error) {
+            console.log(error)                   //if an empty card is clicked, log error
+        }
+    } else if (turn == 2) {
+        try {
+            card = player2.hand.cards[cardNum]
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    return card
+}
+
+/**    
+    @param : x and y, the x and y coordinates of a click on the screen
+    @pre : assumes x and y correspond to the actions canvas
+    @post : returns the action that x and y correspond to.
+*/
+function actionRounding(x, y){
+    //all actions [1003 &lt; x &lt; 1306]
+    //action 1 [650 &lt; y &lt; 683]
+    //action 2 [710 &lt; y &lt; 343]
+    //action 3 [770 &lt; y &lt; 803]
+
+    let actionNum = null
+    let action = null
+    if(x > 1003 &amp;&amp; x &lt; 1306){
+        for(let i = 0; i &lt; 3; i++){
+            if(y > 650 + 60*i &amp;&amp; y &lt; 683 + 60*i){
+                actionNum = i + 1
+                if(unitSelected != null){                       //check whether there is currently a unit selected
+                    action = unitSelected.actions[i]            //if so, set action to the action that has been clicked
+                }
+            }
+        }
+    }
+    return(action)
+
+}
+
+/**    
+    @param : x and y, the x and y coordinates of a click on the screen
+    @pre : called only when a click has been registered by the click event listener.
+    @post : determines what section of the board has been clicked, checks gamestate variables if applicable, then performs the appropriate functionality.
+*/
+function clickProcessing(x, y){
+    if(actionSelected != null &amp;&amp; turn != unitSelected.playerID){
+        alert("That's not your unit!")
+        actionSelected = null
+        unitSelected = null
+        }
+    else {
+        let canvasSection
+        canvasSection = canvasRounding(x, y)            //check to see which section of the canvas the click has occurred in
+        if(canvasSection == 1){                         //map area has been clicked
+            let tile = tileRounding(x, y)               //check which tile was clicked
+            tileClicked(tile)
+        }
+        else if(canvasSection == 2){                    //if the card area has been clicked
+            let card = cardRounding(x, y)               //see which card was clicked
+            if (card != null) {
+                cardClicked(card)
+            }
+        }
+        else if(canvasSection == 3){
+            let action = actionRounding(x, y)
+            if (action != null) {
+                actionClicked(action)
+            }
+        }
+    }
+    console.log(turn, tileSelected, unitSelected, actionSelected, cardSelected)
+    
+
+    drawTemplate()                         //update board to show the outcome of the click
+}
+
+function tileClicked(tile) {
+    if(actionSelected == null){                 //if there is no action currently selected, select the tile and the unit on the tile
+        selectTile(tile)
+    }
+    else {
+        let validTargetSelected = actionSelected.validTarget(tileSelected, actionSelected.range, tile)
+        if(validTargetSelected){
+            executeAction(tile)               //if there is an action currently selected, and if the selected tile is valid for that action, execute the action.
+        }
+        else {
+            unitSelected = null
+            actionSelected = null
+            cardSelected = null
+            selectTile(tile)
+        }
+    }
+}
+
+function selectTile(tile) {
+    tileSelected = tile
+    unitSelected = tile.unit
+}
+
+function cardClicked(card) {
+    if (card == cardSelected) {                 //if you click the card that is currently selected
+        cardSelected = null                     //deselect the card and action
+        actionSelected = null
+    }
+    else {
+        selectTile(findCommander())             //set selected tile to where commander is
+        cardSelected = card                     //update cardSelected
+        actionSelected = card.action            //update actionSelected
+    }
+}
+
+function actionClicked(action) {
+    if (action == actionSelected) {
+        actionSelected = null
+    } 
+    else {
+        actionSelected = action
+    }
+}
+
+document.addEventListener("click", e => {
+    //console.log(e)
+    //console.log([e.x, e.y])
+    if(gameWon == null){               //prevent further clicks from being processed once the game has ended.
+        clickProcessing(e.x, e.y)
+    }
+})</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#action_summonGuardTower">action_summonGuardTower</a></li><li><a href="global.html#actionRounding">actionRounding</a></li><li><a href="global.html#canvasRounding">canvasRounding</a></li><li><a href="global.html#card_fireball">card_fireball</a></li><li><a href="global.html#cardRounding">cardRounding</a></li><li><a href="global.html#clickProcessing">clickProcessing</a></li><li><a href="global.html#drawActions">drawActions</a></li><li><a href="global.html#drawBoard">drawBoard</a></li><li><a href="global.html#drawCards">drawCards</a></li><li><a href="global.html#drawTemplate">drawTemplate</a></li><li><a href="global.html#drawUnits">drawUnits</a></li><li><a href="global.html#executeAction">executeAction</a></li><li><a href="global.html#executeTileTriggers">executeTileTriggers</a></li><li><a href="global.html#executeUnitTriggers">executeUnitTriggers</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#passTurn">passTurn</a></li><li><a href="global.html#tileRounding">tileRounding</a></li><li><a href="global.html#trigger_commanderDestroyed">trigger_commanderDestroyed</a></li><li><a href="global.html#unit_guardTower">unit_guardTower</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sun Oct 31 2021 11:40:38 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
