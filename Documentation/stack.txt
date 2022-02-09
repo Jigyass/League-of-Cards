@@ -1,0 +1,145 @@
+for programming our game, we need a stack
+
+in mtg 4 players use a card based data set to make calls to the stack, which set off triggers that STACK more calls
+then other players each have a turn of priority, during which they can perform certain actions in response (we should totally
+have instant speed cards) once all players pass priority in order, whatever is on the top of the stack resolves. Certain calls
+can have effects on those beneath them. When a call resolves, the overall data set is changed.
+
+We should implement a stack in our game, with some changes. First, since turns are simpler, we can say that a player's turn consists
+of choosing a call to add to the top of the stack. If the stack is empty and it is your turn, you have to choose something. If there
+are calls already, you may pass your turn without adding a call. If both/all players choose to pass without adding a call, the stack
+resolves. To simplify things, I think that the stack should resolve all the way at this point unless there are triggers activated.
+
+Call vs Base Call
+	essentially instant vs sorcery speed, a base call can only be played when the stack is empty, while calls can be added on top of
+	any other call
+
+from the computer's perspective, each call on the stack should be checked with each and every other entity in the game
+
+
+static ability
+	an entity that's existence has an effect, and who's removal ceases the effect
+	the effect can have certain conditions associated
+	when placing a call on the stack, all entities should be checked for static abilities that alter the call
+	Examples
+		"this type of card cannot be played"
+			certain calls cannot be added to the stack
+		"this thing that normally happens according to rules, doesn't happen"
+			certain calls the game would put on the stack as part of the standard rules are prevented
+		changing a characteristic stat of a unit or action
+			range
+			cost? (resource implementation)
+			health?
+			damage?
+		
+	
+triggered ability
+	an entity that is checked immediately after the resolution of a call off of the stack
+	it holds conditions that, if met upon being checked, will add a call to the stack
+		conditions can be a certain event occuring, or a certain state being true
+		eg
+			"when a unit dies, draw a card" - event
+			"when opposing commander controls no units, you win the game" - state
+
+	delayed trigger
+		the effect of a call resolving creates a delayed trigger that should be added to stack later on
+		eg
+			"Create a unit. At the end of your next turn, destroy that unit"
+	reflexive trigger
+		when a call resolves a certain way based on player decision, a call is added to the stack
+		eg
+			"when an enemy unit moves to a tile within 2 tiles of this unit, you may move this unit. If you do,
+				this unit cannot take any action next turn"
+			"when you play this card, opponent may draw a card. If they do, you draw 2 cards"
+	multiple triggers
+		when multiple triggers activate as a result of a single event, the player who's turn it is gets to put
+			the triggers they control onto the stack in any order they choose first, followed by the next
+			player. This means that the triggers placed by the player who's turn it is will resolve last
+	optional/unless triggers
+		the trigger goes on the stack normally and, as it is resolving, gives the player the option of whether
+			or not the effect happens. May also be an "unless" clause that checks for a condition to be true
+			when resolving.
+		
+activatable ability
+	an ability that can be activated by the player, putting a call or calls on the stack
+	Conditions
+		may be certain conditions that restrict when the ability may be activated
+		eg
+			instant/not instant speed
+				instant = any time you have priority
+				not instant = when you have priority AND the stack is empty
+			when it is your turn (but maybe still instant speed)
+			when it is on the battlefield
+			when it is in your hand
+			when it is in your deck
+			when it is in your discard pile
+			only when you control more/less than a number of units
+	cost (resources?)
+		costs are events that occur without passing priority i.e. your opponent can't respond to a cost being payed
+		when costs are payed, the activated ability may put a call on the stack
+
+
+types of interaction
+	deck manipulation
+	
+
+
+calls
+	things that can go on the stack as a call
+			not sure whether to distinguish these as far as targeting things on the stack
+			eg - counter target [card][unit ability][triggered ability] on stack.
+		activated card abilities (playing a card)
+		activated unit abilities
+		triggered abilities
+	certain options are specified when being put on the stack
+		examples
+			target
+			X cost
+		once on the stack, some options may be altered by other calls resolving
+			changing target of a call currently on the stack
+	when resolving, can prompt players with a decision
+		"do this effect. when this effect happens, make this choice"
+		whether or not to do something/anything
+			extra call(s) added to stack
+		how much of a resource to use
+			how many calls added to stack
+			scale of the effect
+	can have conditions associated
+		conditions are checked before being put on stack, and as they are resolved off the top
+			conditions being met puts a call on stack, then players have a chance to respond and add more calls 			in an attempt to change the conditions before it resolves
+		if conditions are not met upon resolution, call fizzles
+
+
+
+
+stuff
+	when this happens
+	
+
+
+
+
+Classes:
+	Stack
+		attributes:
+			calls: ordered array of calls
+		methods:
+			push(call)
+			resolve()
+			getCalls(): calls
+	Call
+		attributes:
+			conditions
+			target(s)
+			event(s)
+		methods:
+			resolve()
+			
+
+
+Events:
+	this unit moves to target tile
+	this unit destroys target unit
+	destroy target unit
+	sacrifice target unit
+	draw x card(s)

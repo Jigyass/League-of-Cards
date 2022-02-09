@@ -1,0 +1,57 @@
+Guard Tower
+	Summon range: 4 tiles
+
+	Watchful Eye: When a unit an opponent controls moves to within 2 tiles of Guard Tower, destroy that unit.
+
+
+Knight
+	Summon range: 3 tiles
+
+	Move: Knight moves to target unoccupied tile within 3 tiles vertical or horizontal.
+
+	Charge: Destroy target unit within 6 tiles vertical or horizontal of Knight. If the unit is destroyed this way, Knight moves to that tile.
+
+
+Assassin 
+	Summon range: 5 tiles
+
+	Move: Assassin moves to target unoccupied tile within 7 tiles diagonally.
+
+	Assassinate: Assassin destroys target unit within 1 tile vertical or horizontal.
+
+
+Firebound Apprentice
+	Summon range: 3 tiles
+
+	Burn Bright: Firebound Mage enters the battlefield with 5 charge counters. When a charge counter is removed from Firebound Mage, if it has no charge counters, destroy it.
+
+	Move: Firebound Mage moves to target unoccupied tile within 2 tiles vertical or horizontal.
+
+	Explosive Entrance: Firebound Mage moves to target unoccupied tile within 7 tiles. Destroy each unit within 1 tile of Firebound Mage.
+		Remove one charge counter.
+
+	Firebolt: Firebound Mage destroys target unit within 3 tiles. Remove 2 charge counters.
+
+
+Ethereal Ward
+	Target non-commander unit within 5 tiles gains Warded.
+
+	Warded: If this unit would be destroyed, it instead loses Warded.
+
+
+Magical Landmine
+	Summon range: 10 tiles
+
+	Trap: This unit does not occupy a tile and is not visible on the map.
+
+	Kaboom: When a unit moves to this tile, Magical Landmine destroys itself, that unit, and each unit within 2 tiles.
+
+Curse
+	Place 5 Death Toll counters on target unit.
+
+Indiscriminate Wrath
+	Target tile within 6 tiles. Destroy each unit within 2 tiles of target tile.
+
+Hocus Pocus
+	Target unit moves to a random unoccupied tile.
+

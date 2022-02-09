@@ -1,0 +1,27 @@
+Full Product:
+
+Game is 2-player, can be played either with local hot-seat or online
+
+Game takes place on a 2d board made up of hexagonal tiles.
+
+Game starts with 2 "commander" units, each under control of opposing players
+
+	Commander has access to a hand of cards which can be played with an effect
+		Cards are drawn from a deck belonging to the player
+		Cards can summon more units
+		Cards can also have other effects
+
+Each player takes turns giving an order to a unit on their board
+
+Each unit type has unique movement/attack/support options
+
+Goal of the game is to take out the opposing player's Commander
+
+
+Prototype:
+
+Game is 2-player and is played locally
+
+Commander units will start with a hand of test cards
+
+Playable cards included in the prototype will be limited to those test cards in the starting hand

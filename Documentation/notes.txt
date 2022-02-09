@@ -1,0 +1,28 @@
+Refactoring goals:
+	current system of actions and triggers does not allow any action or triggered action
+		to be prevented by anything else
+
+	movement actions require source tile to be passed in as well as target tile. this is
+		because movement is just deleting the unit from the source tile and creating
+		a copy at the target tile. 
+
+	A lot of information is needing to be passed down in an unintuitive way. e.g. playerID
+		is passed into hand constructor > passed into card constructors > passed into
+		action constructor > passed into unit constructor, so that a unit can know who
+		owns it
+
+
+Need to put guards on all ranges/relevent so that trying to access tiles outside the map doesn't
+	cause an error
+
+Known error: A Commander being destroyed by a Guard Tower does not result in the game ending. I believe this is because the GT trigger is clobbering the Commander trigger.
+
+DONE-\/
+Needed implementation:
+	It is possible for the game to result in a draw (if both commanders are fireballed, or if a commander moves into a defended tile to take the other commander). 
+	Since we do not have any implementation in place to detect and report this, the way it is currently set up, 
+		the player whose commander is destroyed first (in the fireball scenario, this is determined according to the order in which the fireball checks tiles) will lose.
+
+	We may want an indicator that warns you when your commander is within the range of a fireball, and asks if you're sure you want to proceed since this at best will result in a draw
+		(also we may want to nerf fireball since you can just yeet someone's commander once you get close enough 
+		- I think Jigyas mentioned the possibility of not letting it target commanders at all).

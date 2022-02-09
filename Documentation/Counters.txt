@@ -1,0 +1,10 @@
+Charge
+    typically used by actions, limiting use of those actions
+
+Death Toll 
+    One Death Toll counter is removed at the end of the unit's controller's turn. When the last Death Toll counter is removed from
+        a unit, that unit is destroyed.
+
+Cooldown
+    One Cooldown counter is removed at the end of the unit's controller's turn. Units with at least one Cooldown counter may not
+        use activated abilites. Triggered and Static abilities function normally.
